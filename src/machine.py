@@ -27,12 +27,12 @@ class Machine:
 
 
     def update(self):
-        self.adc_values.append(self.adc.value)
-        if len(self.adc.values) > 10:
+        self.adc_values.append(self.adc.value * 3.3)
+        if len(self.adc_values) > 10:
             self.adc_values.pop(0)
-        avg_adc_value = (sum(self.adc_values) / 10) if len(self.adc_values) == 10 else 0
-
-        adc_on = avg_adc_value > 0.1
+        adc_value_range = (max(self.adc_values) - min(self.adc_values)) if len(self.adc_values) == 10 else 0
+        #print(self.name, adc_value_range)
+        adc_on = adc_value_range > 0.02
         current_time = time.time()
         is_on = self.is_on
 

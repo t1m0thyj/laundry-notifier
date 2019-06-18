@@ -22,7 +22,7 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
 
     def start(self):
         LaundryNotifier.start(self)
-        self.read_button_input()
+        self.read_button_input(True)
         self.button.when_deactivated = self.on_button_up
         threading.Thread(target=self.update_display).start()
 
@@ -49,7 +49,7 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
 
 
     def on_button_up(self):
-        self.read_button_input(self.button.active_time > 0.5)
+        self.read_button_input(False)  # TODO Implement long press
 
 
     def read_button_input(self, turn_off=False):

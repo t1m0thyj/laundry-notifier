@@ -1,6 +1,7 @@
 # Install dependencies
-sudo apt-get install python3-pil python3-pip
+sudo apt-get -y install python3-gpiozero python3-pil python3-pip
 sudo pip3 install adafruit-blinka adafruit-circuitpython-ssd1306
 
-# Enable I2C
+# Enable SPI and I2C
+sudo raspi-config nonint do_spi 0
 sudo raspi-config nonint do_i2c 0
