@@ -1,0 +1,36 @@
+{
+  "adc_model": "mcp3002",
+  "smtp_credentials": {
+    "host": "smtp.email.com",
+    "port": 587,
+    "user": "sender@email.com",
+    "password": "password"
+  },
+  "machines": [
+    {
+      "name": "Washer",
+      "adc_channel": 0,
+      "time_args": {
+        "min_on_time": 1200,
+        "max_off_time": 60
+      }
+    },
+    {
+      "name": "Dryer",
+      "adc_channel": 1,
+      "time_args": {
+        "notify_delay": 300
+      }
+    }
+  ],
+  "users": [
+    {
+      "name": "Jack",
+      "email": "jack@email.com"
+    },
+    {
+      "name": "Jill",
+      "email": "1234567890@sms.com"
+    }
+  ]
+}
