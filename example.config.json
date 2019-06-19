@@ -35,8 +35,7 @@
     {
       "name": "Jill",
       "email": "1234567890@sms.com",
-      "notify": false,
-      "send_sms": true
+      "notify": false
     }
   ]
 }

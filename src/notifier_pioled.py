@@ -15,6 +15,7 @@ from notifier import LaundryNotifier
 class PiOLEDLaundryNotifier(LaundryNotifier):
     def __init__(self, *args):
         super().__init__(*args)
+        self.validate_config()
         self.button = Button(5, pull_up=True, bounce_time=0.1)
         self.button_long_pressed = False
         i2c = busio.I2C(SCL, SDA)
@@ -100,3 +101,20 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
             self.display.show()
             time.sleep(0.1)
 
+
+    def validate_config(self):
+        error = None
+
+        if len(self.machines) != 2:
+            error = "There must be exactly 2 machines in config.json"
+        elif len(self.users) != 2:
+            error = "There must be exactly 2 users in config.json"
+        elif self.users[0].should_notify and self.users[1].should_notify:
+            error = "Only 1 user can have notify=true in config.json"
+
+        if error:
+            logging.error(error)
+        else:
+            logging.info(self.get_notify_status())
+
+        assert error is None
