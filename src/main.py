@@ -6,10 +6,10 @@ from notifier_pioled import PiOLEDLaundryNotifier
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
     cwd = os.path.dirname(__file__)
     with open(os.path.join(cwd, "..", "config.json"), 'r') as fileobj:
         config = json.load(fileobj)
+    logging.basicConfig(level=getattr(logging, config.get("log_level", "info").upper()))
     PiOLEDLaundryNotifier(config).start()
 
 

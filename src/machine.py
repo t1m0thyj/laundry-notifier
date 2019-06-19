@@ -1,3 +1,5 @@
+import logging
+import re
 import time
 from datetime import timedelta
 
@@ -9,9 +11,10 @@ NOTIFY_DELAY = "notify_delay"
 
 
 class Machine:
-    def __init__(self, adc_model, name, adc_channel, time_args):
+    def __init__(self, adc_model, name, adc_channel, adc_threshold, time_args={}):
         self.name = name
         self.adc = getattr(gpiozero, adc_model)(adc_channel)
+        self.adc_threshold = adc_threshold
         self.time_args = time_args
 
         self.adc_on = False
@@ -23,7 +26,7 @@ class Machine:
 
     def get_running_time(self):
         time_str = str(timedelta(seconds=time.time() - self.started_time))
-        return time_str if not time_str.startswith("0:") else time_str[2:]
+        return re.sub(r"^0:|\.\d+$", r"", time_str)
 
 
     def update(self):
@@ -31,8 +34,9 @@ class Machine:
         if len(self.adc_values) > 10:
             self.adc_values.pop(0)
         adc_value_range = (max(self.adc_values) - min(self.adc_values)) if len(self.adc_values) == 10 else 0
-        #print(self.name, adc_value_range)
-        adc_on = adc_value_range > 0.02
+        logging.debug("[{}] {}".format(self.name, round(adc_value_range, 3)))
+
+        adc_on = adc_value_range > self.adc_threshold
         current_time = time.time()
         is_on = self.is_on
 

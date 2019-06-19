@@ -6,7 +6,7 @@ import time
 import adafruit_ssd1306
 import busio
 from board import SCL, SDA
-from gpiozero import DigitalInputDevice
+from gpiozero import Button
 from PIL import Image, ImageDraw, ImageFont
 
 from notifier import LaundryNotifier
@@ -15,21 +15,22 @@ from notifier import LaundryNotifier
 class PiOLEDLaundryNotifier(LaundryNotifier):
     def __init__(self, *args):
         super().__init__(*args)
-        self.button = DigitalInputDevice(5, pull_up=True, bounce_time=0.1)
+        self.button = Button(5, pull_up=True, bounce_time=0.1, hold_time=0.5)
         i2c = busio.I2C(SCL, SDA)
         self.display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c)
 
 
     def start(self):
         LaundryNotifier.start(self)
-        self.read_button_input(True)
-        self.button.when_deactivated = self.on_button_up
+        self.button.when_held = lambda: self.handle_button_press(True)
+        self.button.when_released = lambda: self.handle_button_press(False)
         threading.Thread(target=self.update_display).start()
 
 
     def stop(self):
         LaundryNotifier.stop(self)
-        self.button.when_deactivated = None
+        self.button.when_held = None
+        self.button.when_released = None
         self.display.fill(0)
         self.display.show()
 
@@ -48,12 +49,8 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
         return "Notify: {}".format(status_str)
 
 
-    def on_button_up(self):
-        self.read_button_input(False)  # TODO Implement long press
-
-
-    def read_button_input(self, turn_off=False):
-        if turn_off:
+    def handle_button_press(self, long_press):
+        if long_press:
             self.users[0].should_notify = False
             self.users[1].should_notify = False
         elif self.users[0].should_notify:
