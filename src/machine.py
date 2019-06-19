@@ -11,11 +11,11 @@ NOTIFY_DELAY = "notify_delay"
 
 
 class Machine:
-    def __init__(self, adc_model, name, adc_channel, adc_threshold, time_args={}):
+    def __init__(self, adc_model, name, adc_channel, adc_threshold, time_args=None):
         self.name = name
         self.adc = getattr(gpiozero, adc_model)(adc_channel)
         self.adc_threshold = adc_threshold
-        self.time_args = time_args
+        self.time_args = time_args if time_args is not None else {}
 
         self.adc_on = False
         self.adc_values = []
@@ -38,12 +38,15 @@ class Machine:
 
         adc_on = adc_value_range > self.adc_threshold
         current_time = time.time()
+        if adc_on != self.adc_on:
+            self.last_state_change_time = current_time
+        self.adc_on = adc_on
         is_on = self.is_on
 
-        if adc_on and (not self.is_on) and (current_time - self.last_state_change_time) > 5:
+        if adc_on and (not self.is_on) and (current_time - self.last_state_change_time) > 1:
             is_on = True
             self.started_time = current_time
-        elif (not adc_on) and self.is_on and (current_time - self.last_state_change_time) > 5:
+        elif (not adc_on) and self.is_on and (current_time - self.last_state_change_time) > 1:
             finish_allowed = True
 
             if (MIN_ON_TIME in self.time_args and
@@ -59,10 +62,6 @@ class Machine:
 
             if finish_allowed:
                 is_on = False
-
-        if adc_on != self.adc_on:
-            self.last_state_change_time = current_time
-        self.adc_on = adc_on
 
         status_changed = is_on != self.is_on
         self.is_on = is_on
