@@ -3,14 +3,13 @@ import random
 import threading
 import time
 
-from ..adafruit_ssd1306 import SSD1306_128_32
+from Adafruit_SSD1306 import SSD1306_128_32
 from gpiozero import Button
 from PIL import Image, ImageDraw, ImageFont
 
 from notifier import LaundryNotifier
 
 BUTTON_PIN = 5
-DISPLAY_RESET_PIN = 24
 
 
 class PiOLEDLaundryNotifier(LaundryNotifier):
@@ -19,7 +18,7 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
         self.validate_config()
         self.button = Button(BUTTON_PIN, pull_up=True, bounce_time=0.1)
         self.button_long_pressed = False
-        self.display = SSD1306_128_32(DISPLAY_RESET_PIN)
+        self.display = SSD1306_128_32(None)
 
 
     def start(self):
@@ -27,6 +26,7 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
         self.button.when_held = self.on_button_held
         self.button.when_pressed = self.on_button_pressed
         self.button.when_released = self.on_button_released
+        self.display.begin()
         threading.Thread(target=self.update_display).start()
 
 
@@ -35,8 +35,8 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
         self.button.when_held = None
         self.button.when_pressed = None
         self.button.when_released = None
-        self.display.fill(0)
-        self.display.show()
+        self.display.clear()
+        self.display.display()
 
 
     def get_machine_status(self, id):
@@ -89,7 +89,7 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
             if (current_time - last_reposition_time) > 3600:
                 last_reposition_time = current_time
                 x_pos = random.randint(0, 31)
-                y_pos = random.randint(-2, 9)
+                y_pos = random.randint(-2, 7)
 
             image = Image.new('1', (width, height))
             draw = ImageDraw.Draw(image)
@@ -98,7 +98,7 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
             draw.text((x_pos, y_pos + 8), self.get_machine_status(1), fill=255, font=font)
             draw.text((x_pos, y_pos + 16), self.get_notify_status(), fill=255, font=font)
             self.display.image(image)
-            self.display.show()
+            self.display.display()
             time.sleep(0.1)
 
 

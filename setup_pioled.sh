@@ -2,7 +2,7 @@
 sudo apt-get -y install python3-gpiozero
 
 # Install PiOLED dependencies
-sudo apt-get -y install python3-pil python3-smbus
+sudo apt-get -y install python3-pil python3-pip python3-smbus
 git clone https://github.com/adafruit/Adafruit_Python_SSD1306.git
 cd Adafruit_Python_SSD1306
 sudo python3 setup.py install

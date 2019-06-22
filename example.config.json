@@ -14,7 +14,7 @@
       "adc_threshold": 0.02,
       "time_args": {
         "off_delay_length": 185,
-        "off_delay_stop": 1200
+        "off_delay_stop": 1080
       }
     },
     {
