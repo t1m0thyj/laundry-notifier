@@ -10,7 +10,12 @@ def main():
     with open(os.path.join(cwd, "..", "config.json"), 'r') as fileobj:
         config = json.load(fileobj)
     logging.basicConfig(level=getattr(logging, config.get("log_level", "info").upper()))
-    PiOLEDLaundryNotifier(config).start()
+
+    notifier = PiOLEDLaundryNotifier(config)
+    try:
+        notifier.start()
+    except (KeyboardInterrupt, SystemExit):
+        notifier.stop()
 
 
 if __name__ == "__main__":

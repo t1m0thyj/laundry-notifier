@@ -1,9 +1,9 @@
 {
   "log_level": "info",
-  "adc_model": "mcp3002",
+  "adc_model": "mcp3202",
   "smtp_credentials": {
     "host": "smtp.email.com",
-    "port": 587,
+    "port": 465,
     "user": "sender@email.com",
     "password": "password"
   },

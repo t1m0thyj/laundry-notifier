@@ -8,7 +8,7 @@ from user import User
 
 class LaundryNotifier:
     def __init__(self, config):
-        self.should_stop = False
+        self.stop_event = threading.Event()
         self.smtp_credentials = config["smtp_credentials"]
 
         adc_model = config["adc_model"].upper()
@@ -17,12 +17,12 @@ class LaundryNotifier:
 
 
     def start(self):
-        self.should_stop = False
+        self.stop_event.clear()
         threading.Thread(target=self.watch_machines).start()
 
 
     def stop(self):
-        self.should_stop = True
+        self.stop_event.set()
 
 
     def notify(self, machine):
@@ -31,14 +31,17 @@ class LaundryNotifier:
                 user.notify(self.smtp_credentials, machine)
 
 
+    def on_machine_status_changed(self, machine):
+        if not machine.is_on:
+            self.notify(machine)
+
+        logging.info("{}: {}".format(machine.name, "ON" if machine.is_on else "OFF"))
+
+
     def watch_machines(self):
-        while not self.should_stop:
+        while not self.stop_event.is_set():
             for machine in self.machines:
                 if machine.update():
-                    if not machine.is_on:
-                        self.notify(machine)
-                        machine.started_time = -1
-
-                    logging.info("{}: {}".format(machine.name, "ON" if machine.is_on else "OFF"))
+                    self.on_machine_status_changed(machine)
 
             time.sleep(0.1)

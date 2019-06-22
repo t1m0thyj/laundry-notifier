@@ -3,23 +3,23 @@ import random
 import threading
 import time
 
-import adafruit_ssd1306
-import busio
-from board import SCL, SDA
+from ..adafruit_ssd1306 import SSD1306_128_32
 from gpiozero import Button
 from PIL import Image, ImageDraw, ImageFont
 
 from notifier import LaundryNotifier
+
+BUTTON_PIN = 5
+DISPLAY_RESET_PIN = 24
 
 
 class PiOLEDLaundryNotifier(LaundryNotifier):
     def __init__(self, *args):
         super().__init__(*args)
         self.validate_config()
-        self.button = Button(5, pull_up=True, bounce_time=0.1)
+        self.button = Button(BUTTON_PIN, pull_up=True, bounce_time=0.1)
         self.button_long_pressed = False
-        i2c = busio.I2C(SCL, SDA)
-        self.display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c)
+        self.display = SSD1306_128_32(DISPLAY_RESET_PIN)
 
 
     def start(self):
@@ -84,11 +84,11 @@ class PiOLEDLaundryNotifier(LaundryNotifier):
         width, height = self.display.width, self.display.height
         font = ImageFont.load_default()
 
-        while not self.should_stop:
+        while not self.stop_event.is_set():
             current_time = time.time()
             if (current_time - last_reposition_time) > 3600:
                 last_reposition_time = current_time
-                x_pos = random.randint(0, 44)
+                x_pos = random.randint(0, 31)
                 y_pos = random.randint(-2, 9)
 
             image = Image.new('1', (width, height))

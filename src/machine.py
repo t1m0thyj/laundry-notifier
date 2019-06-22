@@ -29,37 +29,48 @@ class Machine:
         return re.sub(r"^0:|\.\d+$", r"", time_str)
 
 
-    def update(self):
+    def is_finish_allowed(self, current_time):
+        finish_allowed = True
+        off_delay_length = self.time_args.get(OFF_DELAY_LENGTH, -1)
+        off_delay_start = self.time_args.get(OFF_DELAY_START, -1)
+        off_delay_stop = self.time_args.get(OFF_DELAY_STOP, -1)
+
+        if (off_delay_length != -1 and
+                (current_time - self.last_state_change_time) < off_delay_length):
+            if (not (off_delay_start != -1 and (current_time - self.started_time) <
+                    off_delay_start) and not (off_delay_stop != -1 and
+                    (current_time - self.started_time) > off_delay_stop)):
+                finish_allowed = False
+
+        return finish_allowed
+
+
+    def read_adc_value_range(self):
         self.adc_values.append(self.adc.value * 3.3)
         if len(self.adc_values) > 10:
             self.adc_values.pop(0)
-        adc_value_range = (max(self.adc_values) - min(self.adc_values)) if len(self.adc_values) == 10 else 0
-        logging.debug("[{}] {}".format(self.name, round(adc_value_range, 3)))
 
-        adc_on = adc_value_range > self.adc_threshold
+        adc_value_range = 0
+        if len(self.adc_values) == 10:
+            adc_value_range = max(self.adc_values) - min(self.adc_values)
+            logging.debug("[{}] {}".format(self.name, round(adc_value_range, 3)))
+
+        return adc_value_range
+
+
+    def update(self):
+        adc_on = self.read_adc_value_range() > self.adc_threshold
         current_time = time.time()
         if adc_on != self.adc_on:
             self.last_state_change_time = current_time
         self.adc_on = adc_on
         is_on = self.is_on
 
-        if adc_on and (not self.is_on) and (current_time - self.last_state_change_time) > 1:
-            is_on = True
-            self.started_time = current_time
-        elif (not adc_on) and self.is_on and (current_time - self.last_state_change_time) > 1:
-            finish_allowed = True
-            off_delay_length = self.time_args.get(OFF_DELAY_LENGTH, -1)
-            off_delay_start = self.time_args.get(OFF_DELAY_START, -1)
-            off_delay_stop = self.time_args.get(OFF_DELAY_STOP, -1)
-
-            if (off_delay_length != -1 and
-                    (current_time - self.last_state_change_time) < off_delay_length):
-                if (not (off_delay_start != -1 and (current_time - self.started_time) <
-                        off_delay_start) and not (off_delay_stop != -1 and
-                        (current_time - self.started_time) > off_delay_stop)):
-                    finish_allowed = False
-
-            if finish_allowed:
+        if (current_time - self.last_state_change_time) > 1:
+            if adc_on and (not self.is_on):
+                is_on = True
+                self.started_time = current_time
+            elif (not adc_on) and self.is_on and self.is_finish_allowed(current_time):
                 is_on = False
 
         status_changed = is_on != self.is_on
