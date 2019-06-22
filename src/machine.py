@@ -5,9 +5,9 @@ from datetime import timedelta
 
 import gpiozero
 
-MAX_OFF_TIME = "max_off_time"
-MIN_ON_TIME = "min_on_time"
-NOTIFY_DELAY = "notify_delay"
+OFF_DELAY_LENGTH = "off_delay_length"
+OFF_DELAY_START = "off_delay_start"
+OFF_DELAY_STOP = "off_delay_stop"
 
 
 class Machine:
@@ -48,17 +48,16 @@ class Machine:
             self.started_time = current_time
         elif (not adc_on) and self.is_on and (current_time - self.last_state_change_time) > 1:
             finish_allowed = True
+            off_delay_length = self.time_args.get(OFF_DELAY_LENGTH, -1)
+            off_delay_start = self.time_args.get(OFF_DELAY_START, -1)
+            off_delay_stop = self.time_args.get(OFF_DELAY_STOP, -1)
 
-            if (MIN_ON_TIME in self.time_args and
-                    (current_time - self.started_time) < self.time_args[MIN_ON_TIME]):
-                if (MAX_OFF_TIME not in self.time_args or
-                        (current_time - self.last_state_change_time) <
-                        self.time_args[MAX_OFF_TIME]):
+            if (off_delay_length != -1 and
+                    (current_time - self.last_state_change_time) < off_delay_length):
+                if (not (off_delay_start != -1 and (current_time - self.started_time) <
+                        off_delay_start) and not (off_delay_stop != -1 and
+                        (current_time - self.started_time) > off_delay_stop)):
                     finish_allowed = False
-
-            if (NOTIFY_DELAY in self.time_args and
-                    (current_time - self.last_state_change_time) < self.time_args[NOTIFY_DELAY]):
-                finish_allowed = False
 
             if finish_allowed:
                 is_on = False

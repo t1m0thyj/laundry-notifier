@@ -13,8 +13,8 @@
       "adc_channel": 0,
       "adc_threshold": 0.02,
       "time_args": {
-        "min_on_time": 1200,
-        "max_off_time": 60
+        "off_delay_length": 185,
+        "off_delay_stop": 1200
       }
     },
     {
@@ -22,7 +22,7 @@
       "adc_channel": 1,
       "adc_threshold": 0.02,
       "time_args": {
-        "notify_delay": 300
+        "off_delay_length": 5
       }
     }
   ],
