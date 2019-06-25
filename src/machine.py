@@ -1,5 +1,4 @@
 import logging
-import re
 import time
 from datetime import timedelta
 
@@ -15,7 +14,7 @@ class Machine:
         self.name = name
         self.adc = getattr(gpiozero, adc_model)(adc_channel)
         self.adc_threshold = adc_threshold
-        self.time_args = time_args if time_args is not None else {}
+        self.time_args = time_args or {}
 
         self.adc_on = False
         self.adc_values = []
@@ -24,9 +23,13 @@ class Machine:
         self.started_time = -1
 
 
-    def get_running_time(self):
+    def get_running_time_str(self):
         time_str = str(timedelta(seconds=time.time() - self.started_time))
-        return re.sub(r"^0:|\.\d+$", r"", time_str)
+
+        if time_str.startswith("0:"):
+            time_str = time_str[2:]
+
+        return time_str.split(".", 2)[0]
 
 
     def is_finish_allowed(self, current_time):

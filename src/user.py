@@ -1,3 +1,4 @@
+import base64
 import smtplib
 from email.mime.text import MIMEText
 
@@ -13,11 +14,15 @@ class User:
 
 
     def notify(self, credentials, machine):
-        msg = MIMEText(EMAIL_BODY.format(machine.name, machine.get_running_time()))
+        msg = MIMEText(EMAIL_BODY.format(machine.name, machine.get_running_time_str()))
         msg["Subject"] = EMAIL_SUBJECT.format(machine.name)
         msg["From"] = "Laundry Notifier <{}>".format(credentials["user"])
         msg["To"] = self.email
 
+        password = credentials.get("password")
+        if not password and "password_base64" in credentials:
+            password = base64.b64decode(credentials["password_base64"]).decode()
+
         with smtplib.SMTP_SSL(credentials["host"], credentials["port"]) as server:
-            server.login(credentials["user"], credentials["password"])
+            server.login(credentials["user"], password)
             server.send_message(msg)

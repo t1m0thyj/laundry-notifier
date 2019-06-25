@@ -1,6 +1,7 @@
 {
   "log_level": "info",
   "adc_model": "mcp3202",
+  "plugins": ["onebutton", "pioled"],
   "smtp_credentials": {
     "host": "smtp.email.com",
     "port": 465,
