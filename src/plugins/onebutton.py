@@ -22,7 +22,7 @@ class Plugin:
         if not config.get("users"):
             return "There must be at least one user in config.json"
 
-        if len(config["users"].filter(lambda user: user.get("notify"))) > 1:
+        if len([user for user in config["users"] if user.get("notify")]) > 1:
             return "Only one user can have notify=true in config.json"
 
 
@@ -47,8 +47,8 @@ class Plugin:
             if self.current_user >= len(self._notifier.users):
                 self.current_user = 0
 
-        for i, user in enumerate(self._notifier.users):
-            user.should_notify = i == self.current_user
+        for i in range(len(self._notifier.users)):
+            self._notifier.users[i].should_notify = self.current_user == i
         logging.info(self._notifier.get_notify_status())
 
 

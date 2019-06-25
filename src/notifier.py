@@ -50,7 +50,7 @@ class LaundryNotifier:
 
 
     def get_notify_status(self):
-        user_list = self.users.filter(lambda user: user.should_notify)
+        user_list = [user for user in self.users if user.should_notify]
         status_str = ", ".join([user.name for user in user_list]) if user_list else "OFF"
         return "Notify: {}".format(status_str)
 
