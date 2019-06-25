@@ -7,6 +7,7 @@ import gpiozero
 OFF_DELAY_LENGTH = "off_delay_length"
 OFF_DELAY_START = "off_delay_start"
 OFF_DELAY_STOP = "off_delay_stop"
+ON_DELAY_LENGTH = "on_delay_length"
 
 
 class Machine:
@@ -24,7 +25,9 @@ class Machine:
 
 
     def get_running_time_str(self):
-        time_str = str(timedelta(seconds=time.time() - self.started_time))
+        running_time = time.time() - self.started_time
+        running_time += self.time_args.get(ON_DELAY_LENGTH, 0)
+        time_str = str(timedelta(seconds=running_time))
 
         if time_str.startswith("0:"):
             time_str = time_str[2:]
@@ -46,6 +49,12 @@ class Machine:
                 finish_allowed = False
 
         return finish_allowed
+
+
+    def is_start_allowed(self, current_time):
+        on_delay_length = self.time_args.get(ON_DELAY_LENGTH, -1)
+        return (on_delay_length == -1 or
+            (current_time - self.last_state_change_time) > on_delay_length)
 
 
     def read_adc_value_range(self):
@@ -70,7 +79,7 @@ class Machine:
         is_on = self.is_on
 
         if (current_time - self.last_state_change_time) > 1:
-            if adc_on and (not self.is_on):
+            if adc_on and (not self.is_on) and self.is_start_allowed(current_time):
                 is_on = True
                 self.started_time = current_time
             elif (not adc_on) and self.is_on and self.is_finish_allowed(current_time):
