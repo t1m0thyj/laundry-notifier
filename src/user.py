@@ -14,7 +14,7 @@ class User:
         self._notifier = notifier
         self.name = name
         self.email = email
-        self.notify_machines: Set[str] = set()
+        self.notify_machines = set()  # type: Set[str]
 
         for machine_name in (notify_machines or []):
             self.add_machine(machine_name)
@@ -49,7 +49,7 @@ class User:
     def remove_machine(self, machine_name: str) -> None:
         if machine_name == "*":
             self.notify_machines.clear()
-            logging.info("Unsubscribed user \"{}\" from all machines")
+            logging.info("Unsubscribed user \"{}\" from all machines".format(self.name))
         else:
             self.notify_machines.remove(machine_name)
             logging.info("Unsubscribed user \"{}\" from machine \"{}\"".format(self.name, machine_name))

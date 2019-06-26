@@ -53,7 +53,7 @@ class Plugin:
 
 
     def update_display(self) -> None:
-        last_reposition_time: float = -1
+        last_reposition_time = -1  # type: float
         x_pos, y_pos = 0, 0
         width, height = self.display.width, self.display.height
         image = Image.new('1', (width, height))
@@ -70,7 +70,7 @@ class Plugin:
             draw.rectangle((0, 0, width, height), fill=0, outline=0)
             draw.text((x_pos, y_pos), self.get_machine_status(0), fill=255, font=font)
             draw.text((x_pos, y_pos + 8), self.get_machine_status(1), fill=255, font=font)
-            draw.text((x_pos, y_pos + 16), self._notifier.get_notify_status(), fill=255, font=font)
+            draw.text((x_pos, y_pos + 16), self.get_notify_status(), fill=255, font=font)
             self.display.image(image)
             self.display.display()
             time.sleep(0.1)

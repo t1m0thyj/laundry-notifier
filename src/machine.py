@@ -20,10 +20,10 @@ class Machine:
         self.time_args = time_args or {}
 
         self.adc_on = False
-        self.adc_values: List[float] = []
+        self.adc_values = []  # type: List[float]
         self.is_on = False
-        self.last_state_change_time: float = -1
-        self.started_time: float = -1
+        self.last_state_change_time = -1  # type: float
+        self.started_time = -1  # type: float
 
 
     def get_running_time_str(self) -> str:
@@ -62,7 +62,7 @@ class Machine:
         if len(self.adc_values) > 10:
             self.adc_values.pop(0)
 
-        adc_value_range: float = 0
+        adc_value_range = 0  # type: float
         if len(self.adc_values) == 10:
             adc_value_range = max(self.adc_values) - min(self.adc_values)
             logging.debug("[{}] {}".format(self.name, round(adc_value_range, 3)))
