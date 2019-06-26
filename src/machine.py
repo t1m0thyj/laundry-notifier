@@ -1,8 +1,9 @@
 import logging
 import time
 from datetime import timedelta
+from typing import Dict, List, Optional
 
-import gpiozero
+import gpiozero  # pylint: disable=import-error
 
 OFF_DELAY_LENGTH = "off_delay_length"
 OFF_DELAY_START = "off_delay_start"
@@ -11,20 +12,21 @@ ON_DELAY_LENGTH = "on_delay_length"
 
 
 class Machine:
-    def __init__(self, adc_model, name, adc_channel, adc_threshold, time_args=None):
+    def __init__(self, adc_model: str, name: str, adc_channel: int, adc_threshold: float,
+            time_args: Optional[Dict[str, int]]=None):
         self.name = name
         self.adc = getattr(gpiozero, adc_model)(adc_channel)
         self.adc_threshold = adc_threshold
         self.time_args = time_args or {}
 
         self.adc_on = False
-        self.adc_values = []
+        self.adc_values: List[float] = []
         self.is_on = False
-        self.last_state_change_time = -1
-        self.started_time = -1
+        self.last_state_change_time: float = -1
+        self.started_time: float = -1
 
 
-    def get_running_time_str(self):
+    def get_running_time_str(self) -> str:
         time_str = str(timedelta(seconds=time.time() - self.started_time))
 
         if time_str.startswith("0:"):
@@ -33,7 +35,7 @@ class Machine:
         return time_str.split(".", 2)[0]
 
 
-    def is_finish_allowed(self, current_time):
+    def is_finish_allowed(self, current_time: float) -> bool:
         finish_allowed = True
         off_delay_length = self.time_args.get(OFF_DELAY_LENGTH, -1)
         off_delay_start = self.time_args.get(OFF_DELAY_START, -1)
@@ -49,18 +51,18 @@ class Machine:
         return finish_allowed
 
 
-    def is_start_allowed(self, current_time):
+    def is_start_allowed(self, current_time: float) -> bool:
         on_delay_length = self.time_args.get(ON_DELAY_LENGTH, -1)
         return (on_delay_length == -1 or
             (current_time - self.last_state_change_time) > on_delay_length)
 
 
-    def read_adc_value_range(self):
+    def read_adc_value_range(self) -> float:
         self.adc_values.append(self.adc.value * 3.3)
         if len(self.adc_values) > 10:
             self.adc_values.pop(0)
 
-        adc_value_range = 0
+        adc_value_range: float = 0
         if len(self.adc_values) == 10:
             adc_value_range = max(self.adc_values) - min(self.adc_values)
             logging.debug("[{}] {}".format(self.name, round(adc_value_range, 3)))
@@ -68,7 +70,7 @@ class Machine:
         return adc_value_range
 
 
-    def update(self):
+    def update(self) -> bool:
         adc_on = self.read_adc_value_range() > self.adc_threshold
         current_time = time.time()
         if adc_on != self.adc_on:

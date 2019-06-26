@@ -2,23 +2,25 @@ import base64
 import logging
 import smtplib
 from email.mime.text import MIMEText
+from typing import Any, Dict, List, Optional, Set
 
 EMAIL_SUBJECT = "{} finished"
 EMAIL_BODY = EMAIL_SUBJECT + " in {}"
 
 
 class User:
-    def __init__(self, notifier, name, email, notify_machines=None):
+    def __init__(self, notifier: Any, name: str, email: str,
+            notify_machines: Optional[List[str]]=None):
         self._notifier = notifier
         self.name = name
         self.email = email
-        self.notify_machines = set()
+        self.notify_machines: Set[str] = set()
 
         for machine_name in (notify_machines or []):
             self.add_machine(machine_name)
 
 
-    def add_machine(self, machine_name):
+    def add_machine(self, machine_name: str) -> None:
         if machine_name == "*":
             self.notify_machines = set(self._notifier.machines)
             logging.info("Subcribed user \"{}\" to all machines".format(self.name))
@@ -27,13 +29,13 @@ class User:
             logging.info("Subcribed user \"{}\" to machine \"{}\"".format(self.name, machine_name))
 
 
-    def notify(self, credentials, machine):
+    def notify(self, credentials: Dict[str, Any], machine: Any) -> None:
         msg = MIMEText(EMAIL_BODY.format(machine.name, machine.get_running_time_str()))
         msg["Subject"] = EMAIL_SUBJECT.format(machine.name)
         msg["From"] = "Laundry Notifier <{}>".format(credentials["user"])
         msg["To"] = self.email
 
-        password = credentials.get("password")
+        password = credentials.get("password", "")
         if not password and "password_base64" in credentials:
             password = base64.b64decode(credentials["password_base64"]).decode()
 
@@ -44,7 +46,7 @@ class User:
         logging.info("Notified user \"{}\"".format(self.name))
 
 
-    def remove_machine(self, machine_name):
+    def remove_machine(self, machine_name: str) -> None:
         if machine_name == "*":
             self.notify_machines.clear()
             logging.info("Unsubscribed user \"{}\" from all machines")

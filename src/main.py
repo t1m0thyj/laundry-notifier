@@ -5,7 +5,7 @@ import os.path
 from notifier import LaundryNotifier
 
 
-def main():
+def main() -> None:
     cwd = os.path.dirname(__file__)
     with open(os.path.join(cwd, "..", "config.json"), 'r') as fileobj:
         config = json.load(fileobj)

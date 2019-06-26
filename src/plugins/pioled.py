@@ -1,18 +1,19 @@
 import random
 import threading
 import time
+from typing import Any, Dict, Optional
 
-from Adafruit_SSD1306 import SSD1306_128_32
+from Adafruit_SSD1306 import SSD1306_128_32  # pylint: disable=import-error
 from PIL import Image, ImageDraw, ImageFont
 
 
 class Plugin:
-    def __init__(self, notifier, config):
+    def __init__(self, notifier: Any, config: Dict[str, Any]):
         self._notifier = notifier
         self.display = SSD1306_128_32(None)
 
 
-    def validate_config(self, config):
+    def validate_config(self, config: Dict[str, Any]) -> Optional[str]:
         if len(config.get("machines", [])) != 2:
             return "Exactly two machines required in config.json"
 
@@ -22,25 +23,27 @@ class Plugin:
         if len([user for user in config["users"] if user.get("notify_machines")]) > 1:
             return "Only one user can have notify_machines listed in config.json"
 
+        return None
 
-    def start(self):
+
+    def start(self) -> None:
         self.display.begin()
         threading.Thread(target=self.update_display).start()
 
 
-    def stop(self):
+    def stop(self) -> None:
         self.display.clear()
         self.display.display()
 
 
-    def get_machine_status(self, id):
+    def get_machine_status(self, id: int) -> str:
         status_str = "OFF"
         if self._notifier.machines[id].is_on:
             status_str = self._notifier.machines[id].get_running_time_str()
         return "{}: {}".format(self._notifier.machines[id].name, status_str)
 
 
-    def get_notify_status(self):
+    def get_notify_status(self) -> str:
         status_str = "OFF"
         for user in self._notifier.users:
             if user.notify_machines:
@@ -49,8 +52,8 @@ class Plugin:
         return "Notify: {}".format(status_str)
 
 
-    def update_display(self):
-        last_reposition_time = -1
+    def update_display(self) -> None:
+        last_reposition_time: float = -1
         x_pos, y_pos = 0, 0
         width, height = self.display.width, self.display.height
         image = Image.new('1', (width, height))
