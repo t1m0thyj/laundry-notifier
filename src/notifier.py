@@ -14,9 +14,9 @@ class LaundryNotifier:
 
         adc_model = config["adc_model"].upper()
         self.machines = [Machine(adc_model, **args) for args in config["machines"]]
-        self.users = [User(**args) for args in config["users"]]
+        self.users = [User(self, **args) for args in config["users"]]
 
-        self.plugins = [plugins.load(name, self, config) for name in config["plugins"]]
+        self.plugins = {name: plugins.load(name, self, config) for name in config["plugins"]}
         assert self.validate_config(config)
 
 
@@ -27,10 +27,10 @@ class LaundryNotifier:
 
     def validate_config(self, config):
         result = True
-        for plugin in self.plugins:
+        for plugin_name, plugin in self.plugins.items():
             error = plugin.validate_config(config)
             if error:
-                logging.error(error)
+                logging.error("[{}] {}".format(plugin_name, error))
                 result = False
         return result
 
@@ -38,26 +38,19 @@ class LaundryNotifier:
     def start(self):
         self.stop_event.clear()
         threading.Thread(target=self.watch_machines).start()
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             plugin.start()
-        logging.info(self.get_notify_status())
 
 
     def stop(self):
         self.stop_event.set()
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             plugin.stop()
-
-
-    def get_notify_status(self):
-        user_list = [user for user in self.users if user.should_notify]
-        status_str = ", ".join([user.name for user in user_list]) if user_list else "OFF"
-        return "Notify: {}".format(status_str)
 
 
     def notify(self, machine):
         for user in self.users:
-            if user.should_notify:
+            if machine.name in user.notify_machines:
                 user.notify(self.smtp_credentials, machine)
 
 
@@ -65,7 +58,8 @@ class LaundryNotifier:
         if not machine.is_on:
             self.notify(machine)
 
-        logging.info("{}: {}".format(machine.name, "ON" if machine.is_on else "OFF"))
+        status_str = "ON" if machine.is_on else "OFF"
+        logging.info("[{}] Status changed to {}".format(machine.name, status_str))
 
 
     def watch_machines(self):

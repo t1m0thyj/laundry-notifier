@@ -14,7 +14,7 @@
       "adc_channel": 0,
       "adc_threshold": 0.02,
       "time_args": {
-        "off_delay_length": 185,
+        "off_delay_length": 190,
         "off_delay_stop": 1080
       }
     },
@@ -31,12 +31,12 @@
     {
       "name": "Jack",
       "email": "jack@email.com",
-      "notify": true
+      "notify_machines": ["*"]
     },
     {
       "name": "Jill",
       "email": "1234567890@sms.com",
-      "notify": false
+      "notify_machines": []
     }
   ]
 }

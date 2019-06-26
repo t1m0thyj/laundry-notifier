@@ -25,9 +25,7 @@ class Machine:
 
 
     def get_running_time_str(self):
-        running_time = time.time() - self.started_time
-        running_time += self.time_args.get(ON_DELAY_LENGTH, 0)
-        time_str = str(timedelta(seconds=running_time))
+        time_str = str(timedelta(seconds=time.time() - self.started_time))
 
         if time_str.startswith("0:"):
             time_str = time_str[2:]
@@ -81,7 +79,7 @@ class Machine:
         if (current_time - self.last_state_change_time) > 1:
             if adc_on and (not self.is_on) and self.is_start_allowed(current_time):
                 is_on = True
-                self.started_time = current_time
+                self.started_time = current_time - self.time_args.get(ON_DELAY_LENGTH, 0)
             elif (not adc_on) and self.is_on and self.is_finish_allowed(current_time):
                 is_on = False
 

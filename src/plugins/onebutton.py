@@ -1,5 +1,3 @@
-import logging
-
 from gpiozero import Button
 
 BUTTON_PIN = 5
@@ -13,17 +11,17 @@ class Plugin:
         self.current_user = -1
 
         for i, user in enumerate(self._notifier.users):
-            if user.should_notify:
+            if user.notify_machines:
                 self.current_user = i
                 break
 
 
     def validate_config(self, config):
         if not config.get("users"):
-            return "There must be at least one user in config.json"
+            return "At least one user required in config.json"
 
-        if len([user for user in config["users"] if user.get("notify")]) > 1:
-            return "Only one user can have notify=true in config.json"
+        if len([user for user in config["users"] if user.get("notify_machines")]) > 1:
+            return "Only one user can have notify_machines listed in config.json"
 
 
     def start(self):
@@ -40,7 +38,7 @@ class Plugin:
 
     def handle_button_press(self):
         if self.button_long_pressed or (len(self._notifier.users) == 1 and
-                self._notifier.users[0].should_notify):
+                self._notifier.users[0].notify_machines):
             self.current_user = -1
         else:
             self.current_user += 1
@@ -48,8 +46,10 @@ class Plugin:
                 self.current_user = 0
 
         for i in range(len(self._notifier.users)):
-            self._notifier.users[i].should_notify = self.current_user == i
-        logging.info(self._notifier.get_notify_status())
+            if i == self.current_user:
+                self._notifier.users[i].add_machine("*")
+            else:
+                self._notifier.users[i].remove_machine("*")
 
 
     def on_button_held(self):

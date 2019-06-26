@@ -14,10 +14,13 @@ class Plugin:
 
     def validate_config(self, config):
         if len(config.get("machines", [])) != 2:
-            return "There must be exactly two machines in config.json"
+            return "Exactly two machines required in config.json"
 
         if not config.get("users"):
-            return "There must be at least one user in config.json"
+            return "At least one user required in config.json"
+
+        if len([user for user in config["users"] if user.get("notify_machines")]) > 1:
+            return "Only one user can have notify_machines listed in config.json"
 
 
     def start(self):
@@ -35,6 +38,15 @@ class Plugin:
         if self._notifier.machines[id].is_on:
             status_str = self._notifier.machines[id].get_running_time_str()
         return "{}: {}".format(self._notifier.machines[id].name, status_str)
+
+
+    def get_notify_status(self):
+        status_str = "OFF"
+        for user in self._notifier.users:
+            if user.notify_machines:
+                status_str = user.name
+                break
+        return "Notify: {}".format(status_str)
 
 
     def update_display(self):
