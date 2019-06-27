@@ -35,8 +35,8 @@ class Machine:
         return time_str.split(".", 2)[0]
 
 
-    def is_finish_allowed(self, current_time: float) -> bool:
-        finish_allowed = True
+    def is_off_allowed(self, current_time: float) -> bool:
+        off_allowed = True
         off_delay_length = self.time_args.get(OFF_DELAY_LENGTH, -1)
         off_delay_start = self.time_args.get(OFF_DELAY_START, -1)
         off_delay_stop = self.time_args.get(OFF_DELAY_STOP, -1)
@@ -46,12 +46,12 @@ class Machine:
             if (not (off_delay_start != -1 and (current_time - self.started_time) <
                     off_delay_start) and not (off_delay_stop != -1 and
                     (current_time - self.started_time) > off_delay_stop)):
-                finish_allowed = False
+                off_allowed = False
 
-        return finish_allowed
+        return off_allowed
 
 
-    def is_start_allowed(self, current_time: float) -> bool:
+    def is_on_allowed(self, current_time: float) -> bool:
         on_delay_length = self.time_args.get(ON_DELAY_LENGTH, -1)
         return (on_delay_length == -1 or
             (current_time - self.last_state_change_time) > on_delay_length)
@@ -79,10 +79,10 @@ class Machine:
         is_on = self.is_on
 
         if (current_time - self.last_state_change_time) > 1:
-            if adc_on and (not self.is_on) and self.is_start_allowed(current_time):
+            if adc_on and (not self.is_on) and self.is_on_allowed(current_time):
                 is_on = True
                 self.started_time = current_time - self.time_args.get(ON_DELAY_LENGTH, 0)
-            elif (not adc_on) and self.is_on and self.is_finish_allowed(current_time):
+            elif (not adc_on) and self.is_on and self.is_off_allowed(current_time):
                 is_on = False
 
         status_changed = is_on != self.is_on

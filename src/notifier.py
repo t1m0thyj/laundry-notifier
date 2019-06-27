@@ -18,7 +18,7 @@ class LaundryNotifier:
         self.users = [User(self, **args) for args in config["users"]]
 
         self.plugins = {name: plugins.load(name, self, config) for name in config["plugins"]}
-        assert self.validate_config(config)
+        assert self.validate_plugins(config)
 
 
     @property
@@ -26,10 +26,10 @@ class LaundryNotifier:
         return self.stop_event.is_set()
 
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_plugins(self, config: Dict[str, Any]) -> bool:
         result = True
         for plugin_name, plugin in self.plugins.items():
-            error = plugin.validate_config(config)
+            error = plugin.validate(config)
             if error:
                 logging.error("[{}] {}".format(plugin_name, error))
                 result = False

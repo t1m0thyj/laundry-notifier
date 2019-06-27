@@ -18,7 +18,7 @@ class Plugin:
                 break
 
 
-    def validate_config(self, config: Dict[str, Any]) -> Optional[str]:
+    def validate(self, config: Dict[str, Any]) -> Optional[str]:
         if not config.get("users"):
             return "At least one user required in config.json"
 

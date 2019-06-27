@@ -13,7 +13,7 @@ class Plugin:
         self.display = SSD1306_128_32(None)
 
 
-    def validate_config(self, config: Dict[str, Any]) -> Optional[str]:
+    def validate(self, config: Dict[str, Any]) -> Optional[str]:
         if len(config.get("machines", [])) != 2:
             return "Exactly two machines required in config.json"
 
