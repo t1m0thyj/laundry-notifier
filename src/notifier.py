@@ -4,6 +4,7 @@ import time
 from typing import Any, Dict, List
 
 import plugins
+from credentials import Credentials
 from machine import Machine
 from user import User
 
@@ -11,14 +12,14 @@ from user import User
 class LaundryNotifier:
     def __init__(self, config: Dict[str, Any]):
         self.stop_event = threading.Event()
-        self.smtp_credentials = config["smtp_credentials"]
-
-        adc_model = config["adc_model"].upper()
-        self.machines = [Machine(adc_model, **args) for args in config["machines"]]
-        self.users = [User(self, **args) for args in config["users"]]
 
         self.plugins = {name: plugins.load(name, self, config) for name in config["plugins"]}
         assert self.validate_plugins(config)
+
+        self.smtp_credentials = Credentials("smtp", config)
+        adc_model = config["adc_model"].upper()
+        self.machines = [Machine(adc_model, **args) for args in config["machines"]]
+        self.users = [User(self, **args) for args in config["users"]]
 
 
     @property
@@ -49,15 +50,14 @@ class LaundryNotifier:
             plugin.stop()
 
 
-    def notify(self, machine: Machine) -> None:
-        for user in self.users:
-            if machine.name in user.notify_machines:
-                user.notify(self.smtp_credentials, machine)
+    def get_subscribed_users(self, machine: Machine) -> List[User]:
+        return [user for user in self.users if machine.name in user.notify_machines]
 
 
     def on_machine_status_changed(self, machine: Machine) -> None:
         if not machine.is_on:
-            self.notify(machine)
+            for user in self.get_subscribed_users(machine):
+                user.notify(self.smtp_credentials, machine)
 
         status_str = "ON" if machine.is_on else "OFF"
         logging.info("[{}] Status changed to {}".format(machine.name, status_str))

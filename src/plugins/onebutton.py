@@ -12,11 +12,6 @@ class Plugin:
         self.button_long_pressed = False
         self.current_user = -1
 
-        for i, user in enumerate(self._notifier.users):
-            if user.notify_machines:
-                self.current_user = i
-                break
-
 
     def validate(self, config: Dict[str, Any]) -> Optional[str]:
         if not config.get("users"):
@@ -29,6 +24,11 @@ class Plugin:
 
 
     def start(self) -> None:
+        for i, user in enumerate(self._notifier.users):
+            if user.notify_machines:
+                self.current_user = i
+                break
+
         self.button.when_held = self.on_button_held
         self.button.when_pressed = self.on_button_pressed
         self.button.when_released = self.on_button_released
