@@ -24,7 +24,7 @@ class User:
 
     def add_machine(self, machine_name: str) -> None:
         if machine_name == "*":
-            self.notify_machines = set(self._notifier.machines)
+            self.notify_machines = set([machine.name for machine in self._notifier.machines])
             logging.info("Subcribed user \"{}\" to all machines".format(self.name))
         else:
             self.notify_machines.add(machine_name)

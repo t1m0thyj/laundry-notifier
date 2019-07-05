@@ -17,8 +17,7 @@ class LaundryNotifier:
         assert self.validate_plugins(config)
 
         self.smtp_credentials = Credentials("smtp", config)
-        adc_model = config["adc_model"].upper()
-        self.machines = [Machine(adc_model, **args) for args in config["machines"]]
+        self.machines = [Machine(config["adcs_spi"], **args) for args in config["machines"]]
         self.users = [User(self, **args) for args in config["users"]]
 
 

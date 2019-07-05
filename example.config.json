@@ -1,6 +1,11 @@
 {
   "log_level": "info",
-  "adc_model": "mcp3202",
+  "adcs_spi": [
+    {
+      "model": "mcp3202",
+      "gpio_args": {}
+    }
+  ],
   "plugins": ["onebutton", "pioled"],
   "smtp_credentials": {
     "host": "smtp.email.com",
@@ -11,7 +16,7 @@
   "machines": [
     {
       "name": "Washer",
-      "adc_channel": 0,
+      "adc_channel": [0, 0],
       "adc_threshold": 0.02,
       "time_args": {
         "off_delay_length": 190,
@@ -20,7 +25,7 @@
     },
     {
       "name": "Dryer",
-      "adc_channel": 1,
+      "adc_channel": [0, 1],
       "adc_threshold": 0.02,
       "time_args": {
         "off_delay_length": 5

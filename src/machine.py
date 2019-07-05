@@ -1,7 +1,7 @@
 import logging
 import time
 from datetime import timedelta
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import gpiozero  # pylint: disable=import-error
 
@@ -12,12 +12,16 @@ ON_DELAY_LENGTH = "on_delay_length"
 
 
 class Machine:
-    def __init__(self, adc_model: str, name: str, adc_channel: int, adc_threshold: float,
-            time_args: Optional[Dict[str, int]]=None):
+    def __init__(self, adc_data: List[Dict[str, Any]], name: str, adc_channel: List[int],
+            adc_threshold: float, time_args: Optional[Dict[str, int]]=None):
         self.name = name
-        self.adc = getattr(gpiozero, adc_model)(adc_channel)
         self.adc_threshold = adc_threshold
         self.time_args = time_args or {}
+
+        adc_num, adc_channel_num = adc_channel
+        adc_model = adc_data[adc_num]["model"].upper()
+        adc_kwargs = adc_data[adc_num].get("gpio_args", {})
+        self.adc = getattr(gpiozero, adc_model)(adc_channel_num, **adc_kwargs)
 
         self.adc_on = False
         self.adc_values = []  # type: List[float]

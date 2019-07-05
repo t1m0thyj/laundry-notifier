@@ -8,7 +8,8 @@ BUTTON_PIN = 5
 class Plugin:
     def __init__(self, notifier: Any, config: Dict[str, Any]):
         self._notifier = notifier
-        self.button = Button(BUTTON_PIN, pull_up=True, bounce_time=0.1)
+        button_pin = config.get("onebutton_pin", BUTTON_PIN)
+        self.button = Button(button_pin, pull_up=True, bounce_time=0.1)
         self.button_long_pressed = False
         self.current_user = -1
 
