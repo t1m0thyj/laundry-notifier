@@ -17,7 +17,7 @@ class LaundryNotifier:
         assert self.validate_plugins(config)
 
         self.smtp_credentials = Credentials("smtp", config)
-        self.machines = [Machine(config["adcs_spi"], **args) for args in config["machines"]]
+        self.machines = [Machine(config["adc_config"], **args) for args in config["machines"]]
         self.users = [User(self, **args) for args in config["users"]]
 
 
@@ -39,8 +39,15 @@ class LaundryNotifier:
     def start(self) -> None:
         self.stop_event.clear()
         threading.Thread(target=self.watch_machines).start()
+
+        plugin_start_time = time.time()
         for plugin in self.plugins.values():
             plugin.start()
+
+        if self.plugins:
+            plugin_start_length = round(time.time() - plugin_start_time, 3)
+            logging.info("Started {} plugin(s) in {} s".format(len(self.plugins),
+                plugin_start_length))
 
 
     def stop(self) -> None:

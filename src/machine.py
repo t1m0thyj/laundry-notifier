@@ -12,15 +12,15 @@ ON_DELAY_LENGTH = "on_delay_length"
 
 
 class Machine:
-    def __init__(self, adc_data: List[Dict[str, Any]], name: str, adc_channel: List[int],
+    def __init__(self, adc_config: List[Dict[str, Any]], name: str, adc_channel: List[int],
             adc_threshold: float, time_args: Optional[Dict[str, int]]=None):
         self.name = name
         self.adc_threshold = adc_threshold
         self.time_args = time_args or {}
 
         adc_num, adc_channel_num = adc_channel
-        adc_model = adc_data[adc_num]["model"].upper()
-        adc_kwargs = adc_data[adc_num].get("gpio_args", {})
+        adc_model = adc_config[adc_num]["model"].upper()
+        adc_kwargs = adc_config[adc_num].get("gpio_args", {})
         self.adc = getattr(gpiozero, adc_model)(adc_channel_num, **adc_kwargs)
 
         self.adc_on = False

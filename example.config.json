@@ -1,6 +1,6 @@
 {
   "log_level": "info",
-  "adcs_spi": [
+  "adc_config": [
     {
       "model": "mcp3202",
       "gpio_args": {}
