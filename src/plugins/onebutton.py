@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, Optional
 
 from gpiozero import Button  # pylint: disable=import-error
@@ -8,8 +9,8 @@ BUTTON_PIN = 5
 class Plugin:
     def __init__(self, notifier: Any, config: Dict[str, Any]):
         self._notifier = notifier
-        button_pin = config.get("onebutton_pin", BUTTON_PIN)
-        self.button = Button(button_pin, pull_up=True, bounce_time=0.1)
+        self.button_pin = config.get("onebutton_pin", BUTTON_PIN)
+        self.button = Button(self.button_pin, pull_up=True)
         self.button_long_pressed = False
         self.current_user = -1
 
@@ -58,15 +59,18 @@ class Plugin:
 
 
     def on_button_held(self) -> None:
+        logging.info("Button on pin {} held for 1 sec".format(self.button_pin))
         if len(self._notifier.users) > 1:
             self.button_long_pressed = True
             self.handle_button_press()
 
 
     def on_button_pressed(self) -> None:
+        logging.info("Button on pin {} pressed".format(self.button_pin))
         self.button_long_pressed = False
 
 
     def on_button_released(self) -> None:
+        logging.info("Button on pin {} released".format(self.button_pin))
         if not self.button_long_pressed:
             self.handle_button_press()
