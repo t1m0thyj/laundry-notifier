@@ -26,7 +26,7 @@ def main() -> None:
     cwd = os.path.dirname(__file__)
     with open(os.path.join(cwd, "..", "config.json"), 'r') as fileobj:
         config = load_json_with_comments(fileobj)
-    init_logger(os.path.join(cwd, "logs"), config["log_level"])
+    init_logger(os.path.join(cwd, "..", "logs"), config["log_level"])
 
     notifier = LaundryNotifier(config)
     try:
