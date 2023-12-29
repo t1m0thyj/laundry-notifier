@@ -69,7 +69,7 @@ class Machine:
         adc_value_range = 0  # type: float
         if len(self.adc_values) == 10:
             adc_value_range = max(self.adc_values) - min(self.adc_values)
-            logging.debug("[{}] {}".format(self.name, round(adc_value_range, 3)))
+            # logging.debug("[{}] {}".format(self.name, round(adc_value_range, 3)))
 
         return adc_value_range
 
@@ -79,6 +79,7 @@ class Machine:
         current_time = time.time()
         if adc_on != self.adc_on:
             self.last_state_change_time = current_time
+            logging.debug("[{}] adc_values: {}".format(self.name, ",".join(self.adc_values)))
         self.adc_on = adc_on
         is_on = self.is_on
 
@@ -88,6 +89,7 @@ class Machine:
                 self.started_time = current_time - self.time_args.get(ON_DELAY_LENGTH, 0)
             elif (not adc_on) and self.is_on and self.is_off_allowed(current_time):
                 is_on = False
+            logging.debug("[{}] adc_on: {}, is_on_old: {}, is_on_new: {}".format(self.name, adc_on, self.is_on, is_on))
 
         status_changed = is_on != self.is_on
         self.is_on = is_on
