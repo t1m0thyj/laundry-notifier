@@ -19,7 +19,7 @@ def init_logger(logs_dir, log_level="info"):
     os.makedirs(logs_dir, exist_ok=True)
     file_handler = RotatingFileHandler(os.path.join(logs_dir, "app.log"), maxBytes=1024 * 1024, backupCount=10)
     memory_handler = MemoryHandler(1024 * 10, flushLevel=logging.ERROR, target=file_handler)
-    logging.basicConfig(level=getattr(logging, log_level.upper()), handlers=[memory_handler, logging.StreamHandler()])
+    logging.basicConfig(level=getattr(logging, log_level.upper()), handlers=[logging.StreamHandler(), memory_handler])
 
 
 def main() -> None:

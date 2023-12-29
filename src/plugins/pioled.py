@@ -1,3 +1,4 @@
+import logging
 import random
 import threading
 import time
@@ -11,6 +12,7 @@ class Plugin:
     def __init__(self, notifier: Any, config: Dict[str, Any]):
         self._notifier = notifier
         self.display = SSD1306_128_32(None)
+        logging.getLogger("Adafruit_SSD1306.SSD1306Base").setLevel(logging.WARNING)
 
 
     def validate(self, config: Dict[str, Any]) -> Optional[str]:
