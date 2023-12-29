@@ -89,8 +89,9 @@ class Machine:
                 self.started_time = current_time - self.time_args.get(ON_DELAY_LENGTH, 0)
             elif (not adc_on) and self.is_on and self.is_off_allowed(current_time):
                 is_on = False
-            logging.debug("[{}] adc_on: {}, is_on_old: {}, is_on_new: {}".format(self.name, adc_on, self.is_on, is_on))
 
         status_changed = is_on != self.is_on
+        if status_changed:
+            logging.debug("[{}] adc_on: {}, is_on_old: {}, is_on_new: {}".format(self.name, adc_on, self.is_on, is_on))
         self.is_on = is_on
         return status_changed
