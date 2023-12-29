@@ -8,11 +8,17 @@ from Adafruit_SSD1306 import SSD1306_128_32  # pylint: disable=import-error
 from PIL import Image, ImageDraw, ImageFont
 
 
+class AdafruitI2CFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return not "Adafruit_I2C" in record.getMessage() or record.levelno > logging.INFO
+
+
 class Plugin:
     def __init__(self, notifier: Any, config: Dict[str, Any]):
         self._notifier = notifier
+        for handler in logging.getLogger().handlers:
+            handler.addFilter(AdafruitI2CFilter())
         self.display = SSD1306_128_32(None)
-        logging.getLogger("Adafruit_SSD1306.SSD1306Base").setLevel(logging.WARNING)
 
 
     def validate(self, config: Dict[str, Any]) -> Optional[str]:
