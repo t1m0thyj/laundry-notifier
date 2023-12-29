@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 class AdafruitI2CFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        return not "Adafruit_I2C" in record.getMessage() or record.levelno > logging.INFO
+        return not record.name.startswith("Adafruit_I2C") or record.levelno > logging.INFO
 
 
 class Plugin:
