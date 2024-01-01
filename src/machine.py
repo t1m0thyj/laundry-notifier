@@ -75,11 +75,14 @@ class Machine:
 
 
     def update(self) -> bool:
-        adc_on = self.read_adc_value_range() > self.adc_threshold
+        adc_value_range = self.read_adc_value_range()
+        adc_on = adc_value_range > self.adc_threshold
         current_time = time.time()
         if adc_on != self.adc_on:
             self.last_state_change_time = current_time
-            logging.debug("[{}] adc_values: {}".format(self.name, ",".join(str(x) for x in self.adc_values)))
+            logging.debug("[{}] adc_threshold: {}, adc_value_range: {}, adc_values: {}".format(
+                self.name, self.adc_threshold, round(adc_value_range, 3),
+                ",".join(format(x, ".6f") for x in self.adc_values)))
         self.adc_on = adc_on
         is_on = self.is_on
 
@@ -92,6 +95,7 @@ class Machine:
 
         status_changed = is_on != self.is_on
         if status_changed:
-            logging.debug("[{}] adc_on: {}, is_on_old: {}, is_on_new: {}".format(self.name, adc_on, self.is_on, is_on))
+            logging.debug("[{}] adc_on: {}, is_on_old: {}, is_on_new: {}".format(
+                self.name, adc_on, self.is_on, is_on))
         self.is_on = is_on
         return status_changed
