@@ -79,7 +79,7 @@ class Machine:
         current_time = time.time()
         if adc_on != self.adc_on:
             self.last_state_change_time = current_time
-            logging.debug("[{}] adc_values: {}".format(self.name, ",".join(self.adc_values)))
+            logging.debug("[{}] adc_values: {}".format(self.name, ",".join(str(x) for x in self.adc_values)))
         self.adc_on = adc_on
         is_on = self.is_on
 
