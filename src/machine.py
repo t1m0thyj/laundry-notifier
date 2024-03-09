@@ -5,10 +5,10 @@ from typing import Any, Dict, List, Optional
 
 import gpiozero  # pylint: disable=import-error
 
-OFF_DELAY_LENGTH = "off_delay_length"
-OFF_DELAY_START = "off_delay_start"
+OFF_DELAY_LENGTH = "off_delay_length" # Machine state must be constant at least X sec before it becomes OFF
+OFF_DELAY_START = "off_delay_start"   # Off delay applies only in range of (start, stop) and otherwise is ignored
 OFF_DELAY_STOP = "off_delay_stop"
-ON_DELAY_LENGTH = "on_delay_length"
+ON_DELAY_LENGTH = "on_delay_length"   # Machine state must be constant at least X sec before it becomes ON
 
 
 class Machine:
